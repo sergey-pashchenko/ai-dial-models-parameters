@@ -12,20 +12,19 @@ class DialClient:
     _api_key: str
 
     def __init__(self, endpoint: str, deployment_name: str):
-        api_key = os.getenv('DIAL_API_KEY', '')
+        api_key = os.getenv("DIAL_API_KEY", "")
         if not api_key or api_key.strip() == "":
             raise ValueError("API key cannot be null or empty")
 
-        self._endpoint = endpoint.format(
-            model=deployment_name
-        )
+        self._endpoint = endpoint.format(model=deployment_name)
         self._api_key = api_key
 
     def get_completion(
-            self, messages: list[Message],
-            print_request: bool,
-            print_only_content: bool,
-            **kwargs
+        self,
+        messages: list[Message],
+        print_request: bool,
+        print_only_content: bool,
+        **kwargs,
     ) -> Message:
         """
         Send synchronous request to DIAL API and return AI response.
@@ -86,10 +85,7 @@ class DialClient:
                     Like setting custom "end of response" triggers.
                     Default: None
         """
-        headers = {
-            "api-key": self._api_key,
-            "Content-Type": "application/json"
-        }
+        headers = {"api-key": self._api_key, "Content-Type": "application/json"}
         request_data = {
             "messages": [msg.to_dict() for msg in messages],
             **kwargs,
@@ -98,35 +94,38 @@ class DialClient:
         if print_request:
             self._print_request(request_data, headers)
 
-        response = requests.post(url=self._endpoint, headers=headers, json=request_data, timeout=60)
+        response = requests.post(
+            url=self._endpoint, headers=headers, json=request_data, timeout=60
+        )
 
         if response.status_code == 200:
             data = response.json()
             choices = data.get("choices", [])
             if choices:
                 content = choices[0].get("message", {}).get("content")
-                print("\n" + "="*50 + " RESPONSE " + "="*50)
+                print("\n" + "=" * 50 + " RESPONSE " + "=" * 50)
                 if print_only_content:
                     print(content)
                 else:
                     print(json.dumps(data, indent=2, sort_keys=True))
-                print("="*108)
+                print("=" * 108)
                 return Message(Role.AI, content)
             raise ValueError("No Choice has been present in the response")
         else:
             raise Exception(f"HTTP {response.status_code}: {response.text}")
 
-
     def _print_request(self, request_data: dict, headers: dict):
         """Pretty print the request details."""
-        print("\n" + "="*50 + " REQUEST " + "="*50)
+        print("\n" + "=" * 50 + " REQUEST " + "=" * 50)
         print(f"🔗 Endpoint: {self._endpoint}")
 
         print("\n📋 Headers:")
         safe_headers = headers.copy()
         if "api-key" in safe_headers:
             api_key = safe_headers["api-key"]
-            safe_headers["api-key"] = f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+            safe_headers["api-key"] = (
+                f"{api_key[:8]}...{api_key[-4:]}" if len(api_key) > 12 else "***"
+            )
 
         for key, value in safe_headers.items():
             print(f"  {key}: {value}")
@@ -140,12 +139,14 @@ class DialClient:
             for i, msg in enumerate(messages):
                 role = msg.get("role", "unknown")
                 content = msg.get("content", "")
-                content_preview = content[:100] + "..." if len(content) > 100 else content
-                print(f"    [{i+1}] {role.upper()}: {content_preview}")
+                content_preview = (
+                    content[:100] + "..." if len(content) > 100 else content
+                )
+                print(f"    [{i + 1}] {role.upper()}: {content_preview}")
 
         if other_params:
             print("\n  Parameters:")
             for key, value in sorted(other_params.items()):
                 print(f"    {key}: {value}")
 
-        print("="*107)
+        print("=" * 107)
