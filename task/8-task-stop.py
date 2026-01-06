@@ -9,11 +9,14 @@ from task.app.main import run
 
 run(
     deployment_name="gpt-4o",
-    print_only_content=True,
     # TODO:
     #  1. Use `stop` parameter with value "\n\n"
     #  2. Use `stop` parameter with values ["**Embedding Layer**", "**Transformer Blocks**", "**Training**"]
     #  3. Optional: Set `print_only_content` as False to see the full JSON and what is the `finish_reason`
+    #
+    # stop="\n\n",
+    stop=["**Embedding Layer**", "**Transformer Blocks**", "**Training**"],
+    print_only_content=False,
 )
 
 # With `stop` parameter we can stop content generation. It can be used for some policies/guardrails. For instance,
