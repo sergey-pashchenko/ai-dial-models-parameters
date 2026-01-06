@@ -14,6 +14,12 @@ run(
     # TODO:
     #  1. Provide `deployment_name` with model from the list above👆
     #  2. Use `n` parameter with value in range from 1 to 5!
+    #
+    # deployment_name="gpt-4o",
+    deployment_name="claude-sonnet-4@20250514",
+    # deployment_name="gemini-2.5-pro",
+    n=3,
+    print_only_content=False,
 )
 
 # Pay attention to the number of choices in the response!
